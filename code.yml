@@ -1,0 +1,71 @@
+---
+# tasks file for docker_installation
+
+# Install required packages
+- name: Install required packages
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+    state: present  # ensure the packages are present
+    update_cache: yes  # update the apt cache
+  when: ansible_distribution in ['Ubuntu', 'Debian']  # condition based on the OS distribution
+  tags: docker  # add a tag for this task
+
+# Add Docker GPG key
+- name: Add Docker GPG key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg  # URL for the Docker GPG key
+    id: 0EBFCD88  # fingerprint for the GPG key
+    state: present  # ensure the GPG key is present
+  when: ansible_distribution in ['Ubuntu', 'Debian']  # condition based on the OS distribution
+  tags: docker  # add a tag for this task
+
+# Add Docker repository for Ubuntu
+- name: Add Docker repository for Ubuntu
+  apt_repository:
+    repo: deb [arch=amd64,arm64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable  # Docker repository for Ubuntu
+    state: present  # ensure the repository is present
+    update_cache: yes  # update the apt cache
+  when: ansible_distribution == 'Ubuntu'  # condition based on the OS distribution
+  tags: docker  # add a tag for this task
+
+# Add Docker repository for Debian
+- name: Add Docker repository for Debian
+  apt_repository:
+    repo: deb [arch=amd64,arm64] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable  # Docker repository for Debian
+    state: present  # ensure the repository is present
+    update_cache: yes  # update the apt cache
+  when: ansible_distribution == 'Debian'  # condition based on the OS distribution
+  tags: docker  # add a tag for this task
+
+# Update apt packages
+- name: Update apt packages
+  apt:
+    update_cache: yes  # update the apt cache
+  tags: docker  # add a tag for this task
+
+# Install docker-ce
+- name: Install docker-ce
+  apt:
+    name: docker-ce  # name of the package to install
+    state: present  # ensure the package is present
+    update_cache: yes  # update the apt cache
+  tags: docker  # add a tag for this task
+
+# Download and install docker-compose
+- name: Download and install docker-compose
+  get_url:
+    url: https://github.com/docker/compose/releases/download/1.29.2/docker-compose-Linux-x86_64  # URL for Docker Compose
+    dest: /usr/local/bin/docker-compose  # destination directory for installation
+    mode: '0755'  # set permissions for the file
+  tags: docker  # add a tag for this task
+
+# Add user to docker group
+- name: Add user to docker group
+  user:
+    name: "{{ ansible_user }}"  # current user
+    groups: docker  # add the user to the docker group
+  tags: docker  # add a tag for this task
