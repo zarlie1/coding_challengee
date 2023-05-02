@@ -1,5 +1,6 @@
 ---
 # tasks file for docker_installation
+- hosts: localhost
 - name: Install required packages
   apt:
     name:
